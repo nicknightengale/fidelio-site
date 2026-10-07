@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f4f2ee">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Fidelio: exact-edition wishlists and collections for boutique disc collectors. By invitation.">
 <meta property="og:image" content="https://fidelio.film/hero.jpg">
 <title>Fidelio Waitlist</title>
@@ -10,12 +12,11 @@
 :root{
   --paper:#f4f2ee; --ink:#191814; --muted:#6c6860; --rule:#2a2924; --line:#b9b5ac;
   --owned:#2f5a45; --navy:#22305a;
+  color-scheme:light;
   --display:"Playfair Display",Georgia,serif;
   --serif:"Cormorant Garamond","Libre Caslon Text",Georgia,serif;
   --text:"Libre Caslon Text",Georgia,serif;
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#15140f;--ink:#efece5;--muted:#a19c91;--rule:#d9d5cc;--line:#4a4840;--owned:#7fb59a;--navy:#a9b6e0;color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#15140f;--ink:#efece5;--muted:#a19c91;--rule:#d9d5cc;--line:#4a4840;--owned:#7fb59a;--navy:#a9b6e0;color-scheme:dark}
 body{background:var(--paper);color:var(--ink);font-family:var(--text)}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:clamp(16px,4vw,48px);padding-block:20px 28px}
 header{text-align:center;border-bottom:1px solid var(--rule);padding-block:8px 18px}
