@@ -1,0 +1,24 @@
+/* Shared styles for Fidelio's text pages (about, privacy). Matches index.html. */
+:root{
+  --paper:#f4f2ee; --ink:#191814; --muted:#6c6860; --rule:#2a2924; --line:#b9b5ac; --navy:#22305a;
+  color-scheme:light;
+  --display:"Playfair Display",Georgia,serif;
+  --serif:"Cormorant Garamond","Libre Caslon Text",Georgia,serif;
+  --text:"Libre Caslon Text",Georgia,serif;
+}
+body{background:var(--paper);color:var(--ink);font-family:var(--text);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:clamp(16px,4vw,48px);padding-block:20px 28px}
+header{text-align:center;border-bottom:1px solid var(--rule);padding-block:8px 18px}
+.mark{font-family:var(--display);font-style:italic;font-weight:600;font-size:clamp(3rem,8vw,5.4rem);line-height:1;letter-spacing:-.01em;margin:0}
+.mark a{color:inherit;text-decoration:none}
+article{max-width:38rem;margin:0 auto;padding-block:28px 48px;line-height:1.6;font-size:1.02rem}
+.eyebrow{font-style:italic;color:var(--navy);font-size:1.2rem;margin:0 0 10px}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(2.2rem,4vw,3rem);line-height:1.05;letter-spacing:-.015em;margin:0 0 20px;text-wrap:balance}
+h2{font-family:var(--serif);font-weight:500;font-size:1.55rem;line-height:1.2;margin:34px 0 8px;padding-top:18px;border-top:1px solid var(--line)}
+p,li{margin:0 0 12px}
+ul{padding-left:1.2rem}
+a{color:var(--ink);text-decoration-thickness:1px;text-underline-offset:3px}
+.dated{color:var(--muted);font-size:.9rem;font-style:italic}
+:focus-visible{outline:2px solid var(--navy);outline-offset:3px}
+footer{border-top:1px solid var(--rule);text-align:center;padding-top:14px;color:var(--muted);font-size:.95rem}
+footer a{color:var(--muted);margin-inline:10px}
