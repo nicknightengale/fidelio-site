@@ -1,4 +1,4 @@
-/* Shared styles for Fidelio's text pages (about, privacy). Matches index.html. */
+/* Shared styles for Fidelio's text pages (about, privacy, support). Matches index.html. */
 :root{
   --paper:#f4f2ee; --ink:#191814; --muted:#6c6860; --rule:#2a2924; --line:#b9b5ac; --navy:#22305a;
   color-scheme:light;
