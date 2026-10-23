@@ -90,8 +90,9 @@ footer{border-top:1px solid var(--rule);text-align:center;padding-top:14px;color
 <footer><a href="/" style="color:inherit">Waitlist</a><span style="margin-inline:10px">·</span><a href="/about.html" style="color:inherit">About</a><span style="margin-inline:10px">·</span><a href="/privacy.html" style="color:inherit">Privacy</a><span style="margin-inline:10px">·</span><a href="/support.html" style="color:inherit">Support</a><span style="margin-inline:10px">·</span>© 2026 Fidelio Cinema LLC</footer>
 </div>
 <script>
-const SUPABASE_URL='https://zewjtksllkdmlnouahpe.supabase.co';      // e.g. https://abcd.supabase.co
-const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpld2p0a3NsbGtkbWxub3VhaHBlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzMTg2NzMsImV4cCI6MjEwNjg5NDY3M30.v0-hLhpvVUoAzCq-dvHATPRHy6bJV0g7fxgiLtzY5ag';       // the public anon key, safe to ship
+// waitlist.sql retired: the waitlist lives in the catalog project (23 Oct 2026)
+const SUPABASE_URL='https://xtnxvgpbqhzgldrjvvcj.supabase.co';      // catalog project (fidelio-catalog)
+const SUPABASE_KEY='sb_publishable_PYWU8QQ2-URNjayCOcmeRQ_4cMUpa7G';  // publishable key, public, safe to ship
 const f=document.getElementById('f'),e=document.getElementById('email'),err=document.getElementById('err');
 f.addEventListener('submit',ev=>{ev.preventDefault();
   if(!/^\S+@\S+\.\S+$/.test(e.value)){err.hidden=false;e.focus();return}
@@ -101,7 +102,7 @@ f.addEventListener('submit',ev=>{ev.preventDefault();
   const row={email:e.value.trim().toLowerCase(),
     labels:[...f.querySelectorAll('input[name=label]:checked')].map(x=>x.value),
     platform:(f.querySelector('input[name=platform]:checked')||{}).value||null};
-  fetch(SUPABASE_URL+'/rest/v1/waitlist',{method:'POST',headers:{apikey:SUPABASE_ANON_KEY,Authorization:'Bearer '+SUPABASE_ANON_KEY,'Content-Type':'application/json',Prefer:'return=minimal'},body:JSON.stringify(row)})
+  fetch(SUPABASE_URL+'/rest/v1/rpc/join_waitlist',{method:'POST',headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json','Content-Profile':'app_api'},body:JSON.stringify({p_email:row.email,p_labels:row.labels,p_platform:row.platform})})
    .then(r=>{ if(r.ok||r.status===409){done()} else {document.getElementById('fail').hidden=false} })
    .catch(()=>{document.getElementById('fail').hidden=false});
 });
