@@ -1,0 +1,13 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["NXH2FMQ6QY.film.fidelio.app", "NXH2FMQ6QY.film.fidelio.app.dev"],
+        "components": [
+          { "/": "/join", "comment": "Household invitations: fidelio.film/join#<code>" },
+          { "/": "/join/", "comment": "The same, with a trailing slash" }
+        ]
+      }
+    ]
+  }
+}
