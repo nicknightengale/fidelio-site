@@ -5,7 +5,9 @@
         "appIDs": ["NXH2FMQ6QY.film.fidelio.app", "NXH2FMQ6QY.film.fidelio.app.dev"],
         "components": [
           { "/": "/join", "comment": "Household invitations: fidelio.film/join#<code>" },
-          { "/": "/join/", "comment": "The same, with a trailing slash" }
+          { "/": "/join/", "comment": "The same, with a trailing slash" },
+          { "/": "/society", "comment": "Film Society invitations: fidelio.film/society#<code>" },
+          { "/": "/society/", "comment": "The same, with a trailing slash" }
         ]
       }
     ]

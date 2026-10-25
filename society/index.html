@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f5f1e8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>An invitation to a Film Society</title>
+<meta name="description" content="Open it on your iPhone to join.">
+<!-- Link preview (Design ruling 24, following ruling 23 part 1): the same for every invitation; no name, no code. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fidelio">
+<meta property="og:url" content="https://fidelio.film/society">
+<meta property="og:title" content="An invitation to a Film Society">
+<meta property="og:description" content="Open it on your iPhone to join.">
+<meta property="og:image" content="https://fidelio.film/join/invitation-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Fidelio">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400&family=Libre+Caslon+Display&family=Libre+Caslon+Text:ital@0;1&display=swap">
+<style>
+  /* App colors (docs/design/04): paper, ink, gray text. */
+  :root{--paper:#f5f1e8;--ink:#191915;--gray:#6b655c;color-scheme:light}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:"Libre Caslon Text",Georgia,serif}
+  main{max-width:22rem;margin:0 auto;padding:56px 16px 64px;text-align:center}
+  .wordmark{display:block;width:150px;height:auto;margin:0 auto 40px}
+  h1{font-family:"Libre Caslon Display",Georgia,serif;font-weight:400;font-size:26px;line-height:1.2;margin:0 0 16px;text-wrap:balance}
+  .line{font-style:italic;font-size:15px;line-height:1.5;color:var(--gray);margin:0 0 24px}
+  .note{font-size:13px;line-height:1.5;color:var(--gray);margin:0}
+  footer{font-family:Inter,system-ui,sans-serif;font-size:11px;color:var(--gray);text-align:center;padding:0 16px 32px;line-height:2}
+  footer a{color:var(--gray);margin-inline:10px}
+  footer span{margin-inline:10px}
+</style>
+</head><body>
+<!-- Film Society invitation links are fidelio.film/society#<code> (Design ruling 24, Oct 24). With Fidelio installed, iOS opens the app straight to Join.
+     This page is for anyone without the app. Nothing here reads the code. -->
+<main>
+  <img class="wordmark" src="/assets/fidelio-wordmark.svg" alt="Fidelio" width="150" height="36">
+  <h1>An invitation to a Film Society</h1>
+  <p class="line">Someone has invited you to a Film Society on Fidelio. Open this link on your iPhone with Fidelio installed, and it will take you straight to Join.</p>
+  <p class="note">Fidelio is in private beta. If you were invited to the beta, install it first, then open this link again.</p>
+</main>
+<footer><a href="/">Waitlist</a><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/support.html">Support</a><span>© 2026 Fidelio Cinema LLC</span></footer>
+</body></html>
