@@ -5,8 +5,7 @@
 <meta name="description" content="Fidelio: exact-edition wishlists and collections for boutique disc collectors. By invitation.">
 <meta property="og:image" content="https://fidelio.film/hero.jpg">
 <title>Fidelio Waitlist</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600&family=Libre+Caslon+Text:ital@0;1&family=Cormorant+Garamond:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
 <style>
 /* Two-column cover: invitation form left, shelf photograph right; hairline rules top and bottom */
 :root{
@@ -45,7 +44,7 @@ button:hover{opacity:.88}
 figure{margin:0;padding-top:52px}
 figure img{display:block;width:100%;height:auto;aspect-ratio:6/5;object-fit:cover;max-width:100%}
 figcaption{font-size:.82rem;color:var(--muted);margin-top:10px;font-style:italic}
-footer{border-top:1px solid var(--rule);text-align:center;padding-top:14px;color:var(--muted);font-size:.95rem}
+footer{border-top:1px solid var(--rule);text-align:center;padding-top:14px;color:var(--muted);font-size:.95rem;display:flex;flex-wrap:wrap;justify-content:center;row-gap:6px}
 @media (max-width:820px){main{grid-template-columns:1fr}figure{order:-1;padding-top:0;max-width:30rem}.opts{grid-template-columns:repeat(2,auto);justify-content:start;column-gap:40px}}
 </style>
 </head><body><div class="wrap">
@@ -87,7 +86,7 @@ footer{border-top:1px solid var(--rule);text-align:center;padding-top:14px;color
     <img src="hero.jpg" alt="A hand holds an iPhone showing Fidelio's edition page for Arrow's Under Siege, shelf number 0327, marked owned, in front of a shelf of boutique discs and the Essential Fellini box">
   </figure>
 </main>
-<footer><a href="/" style="color:inherit">Waitlist</a><span style="margin-inline:10px">·</span><a href="/about.html" style="color:inherit">About</a><span style="margin-inline:10px">·</span><a href="/privacy.html" style="color:inherit">Privacy</a><span style="margin-inline:10px">·</span><a href="/support.html" style="color:inherit">Support</a><span style="margin-inline:10px">·</span>© 2026 Fidelio Cinema LLC</footer>
+<footer><a href="/" style="color:inherit">Waitlist</a><span style="margin-inline:10px">·</span><a href="/about.html" style="color:inherit">About</a><span style="margin-inline:10px">·</span><a href="/privacy.html" style="color:inherit">Privacy</a><span style="margin-inline:10px">·</span><a href="/terms" style="color:inherit">Terms</a><span style="margin-inline:10px">·</span><a href="/support.html" style="color:inherit">Support</a><span style="margin-inline:10px">·</span>© 2026 Fidelio Cinema LLC</footer>
 </div>
 <script>
 // waitlist.sql retired: the waitlist lives in the catalog project (23 Oct 2026)
