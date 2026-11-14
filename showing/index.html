@@ -61,7 +61,7 @@
 </head><body>
 <!-- Showing invitations: fidelio.film/showing#<code> (Design ruling 59 part 3, Nov 12; section 88, Nov 13; app migration 0055).
      The code stays in the fragment, which browsers never send to fidelio.film. The page sends it, and the seat's token,
-     only in the body of a request to Fidelio's database (four functions, nothing else). The token is kept in this browser.
+     only in the body of a request to Fidelio's guest function (app-guests; four actions, nothing else). The token is kept in this browser.
      Universal links: /showing is left out of /.well-known/apple-app-site-association, so this page opens even with the app installed.
      Preview without a code: ?sample=open | full | started | cancelled | removed | gaveup | notvalid | cantload | seated | seatedhidden -->
 <main>
@@ -76,9 +76,10 @@
 <script>
 (function(){
 'use strict';
-// Fidelio's database (the same project the waitlist uses). Publishable key: public, safe to ship.
-const API='https://xtnxvgpbqhzgldrjvvcj.supabase.co/rest/v1/rpc/';
-const KEY='sb_publishable_PYWU8QQ2-URNjayCOcmeRQ_4cMUpa7G';
+// Fidelio's guest function (Edge Function app-guests, Nick's choice Nov 13: no database rights for anonymous visitors).
+// No key is sent. Each call names its action; the code, first name, 18+ box and token travel only in the body.
+const FN='https://xtnxvgpbqhzgldrjvvcj.supabase.co/functions/v1/app-guests';
+const ACTION={guest_invitation:'invitation',reserve_guest_seat:'reserve',guest_seat:'seat',give_up_guest_seat:'give-up'};
 const view=document.getElementById('view');
 
 // ---------- helpers ----------
@@ -123,9 +124,10 @@ function isRemoved(code){try{return localStorage.getItem(tokenKey(code)+'.remove
 
 // ---------- the four calls ----------
 function call(name,body){
-  return fetch(API+name,{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',
-    headers:{apikey:KEY,'Content-Type':'application/json','Content-Profile':'app','Accept-Profile':'app'},
-    body:JSON.stringify(body)})
+  const b={action:ACTION[name]};Object.keys(body).forEach(k=>{b[k.replace(/^p_/,'')]=body[k]});
+  return fetch(FN,{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(b)})
    .then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()})
    .then(j=>{if(!j||typeof j.answer!=='string')throw new Error('no answer');return j});
 }
@@ -250,7 +252,8 @@ function load(code,note){
     return call('guest_seat',{p_token:t}).then(s=>{
       if(s.answer==='seated')return showSeat(code,s);
       if(s.answer==='cancelled')return showSeat(code,s);
-      dropToken(code);setRemoved(code); // the host took the seat back (or the showing is gone): no form again in this browser
+      dropToken(code);
+      if(s.answer==='removed')setRemoved(code); // the host took the seat back: no form again in this browser (section 89.3)
       return load(code);
     }).catch(()=>showCantLoad(()=>load(code,note)));
   }
