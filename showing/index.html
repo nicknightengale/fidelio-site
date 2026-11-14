@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f5f1e8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>An invitation to a showing</title>
+<meta name="description" content="Reserve a seat at a showing.">
+<!-- Link preview: the same for every invitation; no name, no film, no code (as ruling 23 part 1 and ruling 24). -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Fidelio">
+<meta property="og:url" content="https://fidelio.film/showing">
+<meta property="og:title" content="An invitation to a showing">
+<meta property="og:description" content="Reserve a seat at a showing.">
+<meta property="og:image" content="https://fidelio.film/join/invitation-preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Fidelio">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/assets/fidelio-app-icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<style>
+  /* App colors (docs/design/04): paper, ink, gray text, navy. */
+  :root{--paper:#f5f1e8;--ink:#191915;--gray:#6b655c;--line:#b9b5ac;--navy:#22305a;color-scheme:light}
+  body{background:var(--paper);color:var(--ink);margin:0;font-family:"Libre Caslon Text",Georgia,serif}
+  main{max-width:22rem;margin:0 auto;padding:56px 16px 48px;text-align:center}
+  .wordmark{display:block;width:150px;height:auto;margin:0 auto 32px}
+  .eyebrow{font-style:italic;color:var(--navy);font-size:15px;margin:0 0 10px}
+  h1{font-family:"Libre Caslon Display",Georgia,serif;font-weight:400;font-size:30px;line-height:1.15;margin:0 0 10px;text-wrap:balance}
+  h1.seat{font-size:22px}
+  .films{font-size:16px;line-height:1.45;margin:0 0 4px}
+  .films em{font-style:italic}
+  .doors{font-size:13px;color:var(--gray);margin:0 0 14px}
+  .gray{font-size:13px;line-height:1.5;color:var(--gray);margin:0 0 6px}
+  .place{font-size:15px;line-height:1.45;margin:14px 0 4px}
+  .address{font-size:15px;line-height:1.45;margin:0 0 4px;white-space:pre-line}
+  .directions{font-size:13px;line-height:1.5;color:var(--gray);margin:0 0 6px;white-space:pre-line}
+  .state{font-size:16px;line-height:1.45;margin:22px 0 6px}
+  form{margin:26px 0 0;text-align:left}
+  label.tag{display:block;font-family:Inter,system-ui,sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;color:var(--gray);margin:0 0 6px}
+  input[type=text]{box-sizing:border-box;width:100%;font:16px "Libre Caslon Text",Georgia,serif;color:var(--ink);background:#fff;border:1px solid var(--ink);border-radius:0;padding:11px 12px;margin:0 0 16px;-webkit-appearance:none;appearance:none}
+  .box{display:flex;gap:10px;align-items:center;font-size:15px;margin:0 0 20px;cursor:pointer}
+  .box input{width:20px;height:20px;margin:0;accent-color:var(--ink)}
+  button.fill{display:block;width:100%;font:16px "Libre Caslon Text",Georgia,serif;color:var(--paper);background:var(--ink);border:1px solid var(--ink);border-radius:0;padding:13px 12px;cursor:pointer}
+  button.fill:disabled{opacity:.35;cursor:default}
+  button.outline{display:block;width:100%;font:16px "Libre Caslon Text",Georgia,serif;color:var(--ink);background:transparent;border:1px solid var(--ink);border-radius:0;padding:13px 12px;margin:22px 0 0;cursor:pointer}
+  .fail{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 10px;text-align:center}
+  .below{margin:12px 0 0;text-align:center}
+  .quiet{display:inline-block;margin:18px 0 0;font:14px "Libre Caslon Text",Georgia,serif;color:var(--gray);background:none;border:0;padding:4px;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer}
+  .foot{border-top:1px solid var(--line);margin:40px 0 0;padding-top:20px}
+  .foot p{font-size:14px;line-height:1.5;margin:0 0 6px}
+  .foot a{color:var(--ink);font-size:14px;text-underline-offset:3px;text-decoration-thickness:1px}
+  footer{font-family:Inter,system-ui,sans-serif;font-size:11px;color:var(--gray);text-align:center;padding:0 16px 32px;line-height:2;display:flex;flex-wrap:wrap;justify-content:center}
+  footer a{color:var(--gray);margin-inline:10px}
+  footer span{margin-inline:10px}
+  [hidden]{display:none!important}
+</style>
+</head><body>
+<!-- Showing invitations: fidelio.film/showing#<code> (Design ruling 59 part 3, Nov 12; section 88, Nov 13; app migration 0055).
+     The code stays in the fragment, which browsers never send to fidelio.film. The page sends it, and the seat's token,
+     only in the body of a request to Fidelio's database (four functions, nothing else). The token is kept in this browser.
+     Universal links: /showing is left out of /.well-known/apple-app-site-association, so this page opens even with the app installed.
+     Preview without a code: ?sample=open | full | started | cancelled | removed | notvalid | seated | seatedhidden -->
+<main>
+  <img class="wordmark" src="/assets/fidelio-wordmark.svg" alt="Fidelio" width="150" height="36">
+  <div id="view" aria-live="polite"><p class="gray">Loading the invitation…</p></div>
+  <div class="foot">
+    <p>Fidelio is a home for your film collection.</p>
+    <a href="/">Fidelio is in private beta. Join the waitlist →</a>
+  </div>
+</main>
+<footer><a href="/">Waitlist</a><a href="/what-fidelio-is">What Fidelio is</a><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms">Terms</a><a href="/support.html">Support</a><span>© 2026 Fidelio Cinema LLC</span></footer>
+<script>
+(function(){
+'use strict';
+// Fidelio's database (the same project the waitlist uses). Publishable key: public, safe to ship.
+const API='https://xtnxvgpbqhzgldrjvvcj.supabase.co/rest/v1/rpc/';
+const KEY='sb_publishable_PYWU8QQ2-URNjayCOcmeRQ_4cMUpa7G';
+const view=document.getElementById('view');
+
+// ---------- helpers ----------
+function el(tag,cls,text){const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n}
+function add(parent,...kids){kids.forEach(k=>k&&parent.appendChild(k));return parent}
+function clear(){view.textContent=''}
+function poss(name){return name+'\u2019s'}                      // Jane’s
+function ampm(s){return s.replace(/\s?AM$/,'\u00a0a.m.').replace(/\s?PM$/,'\u00a0p.m.')}
+function dayLine(iso,tz){try{return new Intl.DateTimeFormat('en-US',{weekday:'long',month:'long',day:'numeric',timeZone:tz||undefined}).format(new Date(iso))}catch(e){return ''}}
+function timeLine(iso,tz){try{return ampm(new Intl.DateTimeFormat('en-US',{hour:'numeric',minute:'2-digit',timeZone:tz||undefined}).format(new Date(iso)))}catch(e){return ''}}
+function filmsNode(films,iso,tz){
+  // "Thief · 8:00 p.m."; a double bill "Thief and Manhunter · 8:00 p.m."
+  const p=el('p','films');const t=(films||[]).map(f=>f&&f.title).filter(Boolean);
+  t.forEach((title,i)=>{ if(i>0)p.appendChild(document.createTextNode(i===t.length-1?' and ':', ')); add(p,el('em',null,title)); });
+  const time=iso?timeLine(iso,tz):'';
+  if(time)p.appendChild(document.createTextNode((t.length?' \u00b7 ':'')+time));
+  return (t.length||time)?p:null;
+}
+function head(d,opts){
+  opts=opts||{};
+  add(view,el('p','eyebrow','An invitation to a showing'));
+  if(d.starts_at)add(view,el('h1',null,dayLine(d.starts_at,d.time_zone)));
+  add(view,filmsNode(d.films,d.starts_at,d.time_zone));
+  if(d.doors_at)add(view,el('p','doors','Doors '+timeLine(d.doors_at,d.time_zone)));
+  if(d.society_name)add(view,el('p','gray',d.host_name?('Hosted by '+d.host_name+', for '+d.society_name+'.'):('Hosted for '+d.society_name+'.')));
+  if(opts.seatsLeft&&typeof d.guest_seats_left==='number'&&d.guest_seats_left>0)
+    add(view,el('p','gray',d.guest_seats_left===1?'1 seat left for guests.':d.guest_seats_left+' seats left for guests.'));
+}
+function hostOr(d,fallback){return d&&d.host_name?d.host_name:fallback}
+
+// ---------- storage (this browser only; never sent anywhere but the database) ----------
+function tokenKey(code){return 'fidelio.showing.'+code}
+function getToken(code){try{return localStorage.getItem(tokenKey(code))}catch(e){return null}}
+function setToken(code,t){try{localStorage.setItem(tokenKey(code),t)}catch(e){}}
+function dropToken(code){try{localStorage.removeItem(tokenKey(code))}catch(e){}}
+
+// ---------- the four calls ----------
+function call(name,body){
+  return fetch(API+name,{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',
+    headers:{apikey:KEY,'Content-Type':'application/json','Content-Profile':'app','Accept-Profile':'app'},
+    body:JSON.stringify(body)})
+   .then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()})
+   .then(j=>{if(!j||typeof j.answer!=='string')throw new Error('no answer');return j});
+}
+
+// ---------- states ----------
+function showCantLoad(retry){
+  clear();
+  add(view,el('p','eyebrow','An invitation to a showing'));
+  add(view,el('p','state','Couldn\u2019t load the invitation.'));
+  add(view,el('p','gray',navigator.onLine===false?'You\u2019re offline.':'Try again.'));
+  const b=el('button','outline','Try again');b.type='button';b.addEventListener('click',retry);add(view,b);
+}
+function showNotValid(d){
+  clear();
+  add(view,el('p','eyebrow','An invitation to a showing'));
+  add(view,el('h1',null,'This invitation isn\u2019t valid'));
+  add(view,el('p','gray',d&&d.host_name?('Ask '+d.host_name+' for a new one.'):'Ask for a new one.'));
+}
+function cancelledLine(d){
+  // A host's own cancel names the host (ruling 59). A takedown, a host who left or was deleted: no name (in pattern, sections 80 and 83).
+  if(d.cancel_reason==='host'&&!d.taken_down&&d.host_name)return d.host_name+' cancelled this showing.';
+  return 'This showing was cancelled.';
+}
+function showInvitation(code,d,note){
+  clear();
+  if(d.answer==='not valid')return showNotValid(d);
+  if(d.answer==='started'){head(d);add(view,el('p','state','This showing has started.'));return}
+  if(d.answer==='cancelled'){head(d);add(view,el('p','state',cancelledLine(d)));return}
+  head(d,{seatsLeft:d.answer==='open'});
+  if(note)add(view,el('p','state',note));
+  if(d.answer==='full'){add(view,el('p','state','The seats for guests are taken.'));return}
+  if(d.answer!=='open'){return showNotValid(d)}
+  form(code,d);
+}
+function form(code,d){
+  const host=hostOr(d,'The host');
+  const f=el('form');f.noValidate=true;
+  const lab=el('label','tag','YOUR FIRST NAME');lab.htmlFor='fn';
+  const name=el('input');name.type='text';name.id='fn';name.maxLength=30;name.autocomplete='given-name';name.autocapitalize='words';name.spellcheck=false;name.enterKeyHint='done';
+  const boxLab=el('label','box');const box=el('input');box.type='checkbox';box.id='adult';
+  add(boxLab,box,el('span',null,'I\u2019m 18 or older.'));
+  const fail=el('p','fail');fail.hidden=true;
+  const go=el('button','fill','Reserve a seat');go.type='submit';go.disabled=true;
+  const below=el('div','below');
+  add(below,el('p','gray',(d.host_name?d.host_name:'The host')+' and '+d.society_name+' see your first name.'));
+  if(d.address_shown===false)add(below,el('p','gray','The address comes from '+(d.host_name?d.host_name:'the host')+'.'));
+  add(f,lab,name,boxLab,fail,go);add(view,f,below);
+  const ok=()=>{const n=name.value.trim();go.disabled=!(n.length>=1&&n.length<=30&&box.checked)};
+  name.addEventListener('input',()=>{fail.hidden=true;ok()});box.addEventListener('change',()=>{fail.hidden=true;ok()});
+  f.addEventListener('submit',ev=>{
+    ev.preventDefault();ok();if(go.disabled)return;
+    go.disabled=true;name.disabled=true;box.disabled=true;go.textContent='Reserving\u2026';fail.hidden=true;
+    const restore=()=>{go.textContent='Reserve a seat';name.disabled=false;box.disabled=false;ok()};
+    reserve(code,name.value.trim(),box.checked).then(r=>{
+      if(r.answer==='reserved'&&r.token){setToken(code,r.token);return showSeat(code,r.seat||{})}
+      if(r.answer==='bad name'){restore();fail.textContent='Type a first name of up to 30 letters, on one line.';fail.hidden=false;name.focus();return}
+      if(r.answer==='name not allowed'){restore();fail.textContent='That name can\u2019t be used. Change it and try again.';fail.hidden=false;name.focus();return}
+      if(r.answer==='adult needed'){restore();fail.textContent='Tick \u201cI\u2019m 18 or older.\u201d to reserve a seat.';fail.hidden=false;return}
+      // full, started, cancelled, not valid: the invitation's own states
+      return load(code);
+    }).catch(()=>{restore();fail.textContent='Couldn\u2019t reserve a seat. '+(navigator.onLine===false?'You\u2019re offline.':'Try again.');fail.hidden=false});
+  });
+}
+function showSeat(code,s){
+  clear();
+  if(s.answer==='cancelled'){head(s);add(view,el('p','state',cancelledLine(s)));dropToken(code);return}
+  add(view,el('p','eyebrow','An invitation to a showing'));
+  add(view,el('h1','seat',s.first_name?('You have a seat, '+s.first_name+'.'):'You have a seat.'));
+  if(s.starts_at)add(view,el('p','films',dayLine(s.starts_at,s.time_zone)));
+  add(view,filmsNode(s.films,s.starts_at,s.time_zone));
+  if(s.doors_at)add(view,el('p','doors','Doors '+timeLine(s.doors_at,s.time_zone)));
+  if(s.place)add(view,el('p','place',s.place));
+  if(s.address)add(view,el('p','address',s.address));
+  if(s.directions)add(view,el('p','directions',s.directions));
+  if(!s.address&&s.address_shown===false)add(view,el('p','gray','The address comes from '+hostOr(s,'the host')+'.'));
+  if(s.society_name)add(view,el('p','gray',s.host_name?('Hosted by '+s.host_name+', for '+s.society_name+'.'):('Hosted for '+s.society_name+'.')));
+  if(s.started){add(view,el('p','state','This showing has started.'));return}
+  const cal=el('button','outline','Add to Calendar');cal.type='button';cal.addEventListener('click',()=>ics(s));add(view,cal);
+  const fail=el('p','fail');fail.hidden=true;fail.style.marginTop='12px';
+  const give=el('button','quiet','Give up your seat');give.type='button';
+  give.addEventListener('click',()=>{
+    if(!window.confirm('Give up your seat?'))return;
+    give.disabled=true;fail.hidden=true;
+    const t=getToken(code);
+    (t?call('give_up_guest_seat',{p_token:t}):Promise.resolve({answer:'not valid'})).then(r=>{
+      if(r.answer==='given up'||r.answer==='not valid'){dropToken(code);return load(code,'You gave up your seat.')}
+      if(r.answer==='started'){give.disabled=false;fail.textContent='This showing has started.';fail.hidden=false;return}
+      give.disabled=false;
+    }).catch(()=>{give.disabled=false;fail.textContent='Couldn\u2019t give up your seat. '+(navigator.onLine===false?'You\u2019re offline.':'Try again.');fail.hidden=false});
+  });
+  add(view,fail,give);
+}
+function reserve(code,n,a){return call('reserve_guest_seat',{p_code:code,p_first_name:n,p_adult:a})}
+
+// ---------- Add to Calendar: an .ics made here, from the seat ----------
+function icsText(s){
+  const esc=v=>String(v).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+  const stamp=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+  const start=new Date(s.starts_at);const end=new Date(start.getTime()+3*60*60*1000); // 3 hours (stand-in)
+  const titles=(s.films||[]).map(f=>f&&f.title).filter(Boolean);
+  const summary=titles.length?('Showing: '+titles.join(' and ')):'Showing';
+  const where=[s.place,s.address].filter(Boolean).join(', ');
+  const desc=[s.society_name?(s.host_name?('Hosted by '+s.host_name+', for '+s.society_name+'.'):('Hosted for '+s.society_name+'.')):'',s.doors_at?('Doors '+timeLine(s.doors_at,s.time_zone)):'',s.address?(s.directions||''):''].filter(Boolean).join('\n');
+  const uid='showing-'+stamp(start)+'-'+Math.random().toString(36).slice(2)+'@fidelio.film';
+  return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Fidelio//Showing//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+    'UID:'+uid,'DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(end),'SUMMARY:'+esc(summary),
+    where?'LOCATION:'+esc(where):'',desc?'DESCRIPTION:'+esc(desc):'','END:VEVENT','END:VCALENDAR'].filter(Boolean).join('\r\n')+'\r\n';
+}
+function ics(s){
+  const blob=new Blob([icsText(s)],{type:'text/calendar;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='showing.ics';
+  document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+
+// ---------- start ----------
+function codeFromHash(){return decodeURIComponent((location.hash||'').slice(1)).trim()}
+function load(code,note){
+  const t=getToken(code);
+  if(t){
+    return call('guest_seat',{p_token:t}).then(s=>{
+      if(s.answer==='seated')return showSeat(code,s);
+      if(s.answer==='cancelled')return showSeat(code,s);
+      dropToken(code); // removed, given up elsewhere, or gone: back to the invitation
+      return load(code,'You no longer have a seat.');
+    }).catch(()=>showCantLoad(()=>load(code,note)));
+  }
+  return call('guest_invitation',{p_code:code}).then(d=>showInvitation(code,d,note)).catch(()=>showCantLoad(()=>load(code,note)));
+}
+
+// Samples for review (no server call): ?sample=<state>
+const SAMPLE={
+  base:{starts_at:'2026-11-21T04:00:00Z',doors_at:'2026-11-21T03:30:00Z',time_zone:'America/Los_Angeles',films:[{title:'Thief'}],host_name:'Jane',society_name:'The Thursday Club',guest_seats_left:2,address_shown:false},
+};
+function sample(kind){
+  const b=Object.assign({},SAMPLE.base);
+  const seat=Object.assign({},b,{answer:'seated',first_name:'Sam',place:'Jane\u2019s',started:false,address:null,directions:null});
+  switch(kind){
+    case 'open':return showInvitation('SAMPLE',Object.assign(b,{answer:'open'}));
+    case 'full':return showInvitation('SAMPLE',Object.assign(b,{answer:'full',guest_seats_left:0}));
+    case 'started':return showInvitation('SAMPLE',Object.assign(b,{answer:'started'}));
+    case 'cancelled':return showInvitation('SAMPLE',Object.assign(b,{answer:'cancelled',cancel_reason:'host',taken_down:false}));
+    case 'removed':return showInvitation('SAMPLE',Object.assign(b,{answer:'open'}),'You no longer have a seat.');
+    case 'notvalid':return showNotValid({host_name:'Jane'});
+    case 'seated':return showSeat('SAMPLE',Object.assign(seat,{address_shown:true,address:'1234 Example Street\nLos Angeles, CA 90026',directions:'Street parking on Example Street; ring the side gate.'}));
+    case 'seatedhidden':return showSeat('SAMPLE',seat);
+  }
+  return false;
+}
+const sp=new URLSearchParams(location.search).get('sample');
+if(sp&&sample(sp)!==false)return;
+const code=codeFromHash();
+if(!code||code.length<8){showNotValid(null);return}
+load(code);
+window.addEventListener('hashchange',()=>{const c=codeFromHash();if(c)load(c)});
+})();
+</script>
+</body></html>

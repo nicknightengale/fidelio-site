@@ -4,6 +4,8 @@
       {
         "appIDs": ["NXH2FMQ6QY.film.fidelio.app", "NXH2FMQ6QY.film.fidelio.app.dev"],
         "components": [
+          { "/": "/showing", "exclude": true, "comment": "Showing invitations for guests open the web page, never the app: fidelio.film/showing#<code>" },
+          { "/": "/showing/*", "exclude": true, "comment": "The same, with a trailing slash" },
           { "/": "/join", "comment": "Household invitations: fidelio.film/join#<code>" },
           { "/": "/join/", "comment": "The same, with a trailing slash" },
           { "/": "/society", "comment": "Film Society invitations: fidelio.film/society#<code>" },
