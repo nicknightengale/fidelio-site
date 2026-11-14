@@ -119,8 +119,10 @@ function tokenKey(code){return 'fidelio.showing.'+code}
 function getToken(code){try{return localStorage.getItem(tokenKey(code))}catch(e){return null}}
 function setToken(code,t){try{localStorage.setItem(tokenKey(code),t)}catch(e){}}
 function dropToken(code){try{localStorage.removeItem(tokenKey(code))}catch(e){}}
-function setRemoved(code){try{localStorage.setItem(tokenKey(code)+'.removed','1')}catch(e){}}
-function isRemoved(code){try{return localStorage.getItem(tokenKey(code)+'.removed')==='1'}catch(e){return false}}
+// Who took the seat back (the "removed" answer's host_name: the host, or later a co-host); '' when unnamed.
+function setRemoved(code,by){try{localStorage.setItem(tokenKey(code)+'.removed',JSON.stringify({by:by||''}))}catch(e){}}
+function removedBy(code){try{const v=localStorage.getItem(tokenKey(code)+'.removed');if(v===null)return null;try{return (JSON.parse(v)||{}).by||''}catch(e){return ''}}catch(e){return null}}
+function isRemoved(code){return removedBy(code)!==null}
 
 // ---------- the four calls ----------
 function call(name,body){
@@ -153,7 +155,7 @@ function cancelledLine(d){
 }
 function showInvitation(code,d,note){
   clear();
-  if(isRemoved(code)&&(d.answer==='open'||d.answer==='full')){head(d);add(view,el('p','state',(d.host_name?d.host_name:'The host')+' took back your seat.'));return}
+  if(isRemoved(code)&&(d.answer==='open'||d.answer==='full')){const by=removedBy(code);head(d);add(view,el('p','state',(by?by:'The host')+' took back your seat.'));return}
   if(d.answer==='not valid')return showNotValid(d);
   if(d.answer==='started'){head(d);add(view,el('p','state','This showing has started.'));return}
   if(d.answer==='cancelled'){head(d);add(view,el('p','state',cancelledLine(d)));return}
@@ -253,7 +255,7 @@ function load(code,note){
       if(s.answer==='seated')return showSeat(code,s);
       if(s.answer==='cancelled')return showSeat(code,s);
       dropToken(code);
-      if(s.answer==='removed')setRemoved(code); // the host took the seat back: no form again in this browser (section 89.3)
+      if(s.answer==='removed')setRemoved(code,s.host_name); // the host took the seat back: no form again in this browser (section 89.3)
       return load(code);
     }).catch(()=>showCantLoad(()=>load(code,note)));
   }
@@ -272,7 +274,7 @@ function sample(kind){
     case 'full':return showInvitation('SAMPLE',Object.assign(b,{answer:'full',guest_seats_left:0}));
     case 'started':return showInvitation('SAMPLE',Object.assign(b,{answer:'started'}));
     case 'cancelled':return showInvitation('SAMPLE',Object.assign(b,{answer:'cancelled',cancel_reason:'host',taken_down:false}));
-    case 'removed':setRemoved('SAMPLE');{const r=showInvitation('SAMPLE',Object.assign(b,{answer:'open'}));try{localStorage.removeItem(tokenKey('SAMPLE')+'.removed')}catch(e){}return r||true}
+    case 'removed':setRemoved('SAMPLE','Jane');{const r=showInvitation('SAMPLE',Object.assign(b,{answer:'open'}));try{localStorage.removeItem(tokenKey('SAMPLE')+'.removed')}catch(e){}return r||true}
     case 'gaveup':return showInvitation('SAMPLE',Object.assign(b,{answer:'open'}),'You gave up your seat.');
     case 'cantload':return showCantLoad(()=>{});
     case 'notvalid':return showNotValid({host_name:'Jane'});
