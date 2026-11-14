@@ -61,7 +61,7 @@
 </head><body>
 <!-- Showing invitations: fidelio.film/showing#<code> (Design ruling 59 part 3, Nov 12; section 88, Nov 13; app migration 0055).
      The code stays in the fragment, which browsers never send to fidelio.film. The page sends it, and the seat's token,
-     only in the body of a request to Fidelio's database (four functions, nothing else). The token is kept in this browser.
+     only in the body of a request to Fidelio's guest function (app-guests; four actions, nothing else). The token is kept in this browser.
      Universal links: /showing is left out of /.well-known/apple-app-site-association, so this page opens even with the app installed.
      Preview without a code: ?sample=open | full | started | cancelled | removed | gaveup | notvalid | cantload | seated | seatedhidden -->
 <main>
@@ -76,9 +76,10 @@
 <script>
 (function(){
 'use strict';
-// Fidelio's database (the same project the waitlist uses). Publishable key: public, safe to ship.
-const API='https://xtnxvgpbqhzgldrjvvcj.supabase.co/rest/v1/rpc/';
-const KEY='sb_publishable_PYWU8QQ2-URNjayCOcmeRQ_4cMUpa7G';
+// Fidelio's guest function (Edge Function app-guests, Nick's choice Nov 13: no database rights for anonymous visitors).
+// No key is sent. Each call names its action; the code, first name, 18+ box and token travel only in the body.
+const FN='https://xtnxvgpbqhzgldrjvvcj.supabase.co/functions/v1/app-guests';
+const ACTION={guest_invitation:'invitation',reserve_guest_seat:'reserve',guest_seat:'seat',give_up_guest_seat:'give-up'};
 const view=document.getElementById('view');
 
 // ---------- helpers ----------
@@ -118,15 +119,18 @@ function tokenKey(code){return 'fidelio.showing.'+code}
 function getToken(code){try{return localStorage.getItem(tokenKey(code))}catch(e){return null}}
 function setToken(code,t){try{localStorage.setItem(tokenKey(code),t)}catch(e){}}
 function dropToken(code){try{localStorage.removeItem(tokenKey(code))}catch(e){}}
-function setRemoved(code){try{localStorage.setItem(tokenKey(code)+'.removed','1')}catch(e){}}
-function isRemoved(code){try{return localStorage.getItem(tokenKey(code)+'.removed')==='1'}catch(e){return false}}
+// Who took the seat back (the "removed" answer's host_name: the host, or later a co-host); '' when unnamed.
+function setRemoved(code,by){try{localStorage.setItem(tokenKey(code)+'.removed',JSON.stringify({by:by||''}))}catch(e){}}
+function removedBy(code){try{const v=localStorage.getItem(tokenKey(code)+'.removed');if(v===null)return null;try{return (JSON.parse(v)||{}).by||''}catch(e){return ''}}catch(e){return null}}
+function isRemoved(code){return removedBy(code)!==null}
 
 // ---------- the four calls ----------
 function call(name,body){
-  return fetch(API+name,{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',
-    headers:{apikey:KEY,'Content-Type':'application/json','Content-Profile':'app','Accept-Profile':'app'},
-    body:JSON.stringify(body)})
-   .then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()})
+  const b={action:ACTION[name]};Object.keys(body).forEach(k=>{b[k.replace(/^p_/,'')]=body[k]});
+  return fetch(FN,{method:'POST',cache:'no-store',referrerPolicy:'no-referrer',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(b)})
+   .then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json()}) // 400/405/413, and 429/503 "retry": the page's can't-load or failure line
    .then(j=>{if(!j||typeof j.answer!=='string')throw new Error('no answer');return j});
 }
 
@@ -146,12 +150,13 @@ function showNotValid(d){
 }
 function cancelledLine(d){
   // A host's own cancel names the host (ruling 59). A takedown, a host who left or was deleted: no name (in pattern, sections 80 and 83).
-  if(d.cancel_reason==='host'&&!d.taken_down)return (d.host_name?d.host_name:'The host')+' cancelled this showing.';
+  const byHost=('cancelled_by_host' in d)?d.cancelled_by_host===true:(d.cancel_reason==='host'&&!d.taken_down);
+  if(byHost)return (d.host_name?d.host_name:'The host')+' cancelled this showing.';
   return 'This showing was cancelled.';
 }
 function showInvitation(code,d,note){
   clear();
-  if(isRemoved(code)&&(d.answer==='open'||d.answer==='full')){head(d);add(view,el('p','state',(d.host_name?d.host_name:'The host')+' took back your seat.'));return}
+  if(isRemoved(code)&&(d.answer==='open'||d.answer==='full')){const by=removedBy(code);head(d);add(view,el('p','state',(by?by:'The host')+' took back your seat.'));return}
   if(d.answer==='not valid')return showNotValid(d);
   if(d.answer==='started'){head(d);add(view,el('p','state','This showing has started.'));return}
   if(d.answer==='cancelled'){head(d);add(view,el('p','state',cancelledLine(d)));return}
@@ -182,6 +187,7 @@ function form(code,d){
     const restore=()=>{go.textContent='Reserve a seat';name.disabled=false;box.disabled=false;ok()};
     reserve(code,name.value.trim(),box.checked).then(r=>{
       if(r.answer==='reserved'&&r.token){setToken(code,r.token);return showSeat(code,r.seat||{})}
+      if(r.answer==='removed'){dropToken(code);setRemoved(code,r.host_name);return load(code)}
       if(r.answer==='bad name'){restore();fail.textContent=name.value.trim().length>30?'Your first name can be up to 30 characters.':'Add your first name to reserve a seat.';fail.hidden=false;name.focus();return}
       if(r.answer==='name not allowed'){restore();fail.textContent='This name can\u2019t be used. Change it and try again.';fail.hidden=false;name.focus();return}
       if(r.answer==='adult needed'){restore();fail.textContent='Tick \u201cI\u2019m 18 or older.\u201d to reserve a seat.';fail.hidden=false;return}
@@ -219,7 +225,7 @@ function showSeat(code,s){
   });
   add(view,fail,give);
 }
-function reserve(code,n,a){return call('reserve_guest_seat',{p_code:code,p_first_name:n,p_adult:a})}
+function reserve(code,n,a){return call('reserve_guest_seat',{p_code:code,p_first_name:n,p_adult:a,p_token:getToken(code)||null})}
 
 // ---------- Add to Calendar: an .ics made here, from the seat ----------
 function icsText(s){
@@ -250,7 +256,8 @@ function load(code,note){
     return call('guest_seat',{p_token:t}).then(s=>{
       if(s.answer==='seated')return showSeat(code,s);
       if(s.answer==='cancelled')return showSeat(code,s);
-      dropToken(code);setRemoved(code); // the host took the seat back (or the showing is gone): no form again in this browser
+      dropToken(code);
+      if(s.answer==='removed')setRemoved(code,s.host_name); // the host took the seat back: no form again in this browser (section 89.3)
       return load(code);
     }).catch(()=>showCantLoad(()=>load(code,note)));
   }
@@ -269,7 +276,7 @@ function sample(kind){
     case 'full':return showInvitation('SAMPLE',Object.assign(b,{answer:'full',guest_seats_left:0}));
     case 'started':return showInvitation('SAMPLE',Object.assign(b,{answer:'started'}));
     case 'cancelled':return showInvitation('SAMPLE',Object.assign(b,{answer:'cancelled',cancel_reason:'host',taken_down:false}));
-    case 'removed':setRemoved('SAMPLE');{const r=showInvitation('SAMPLE',Object.assign(b,{answer:'open'}));try{localStorage.removeItem(tokenKey('SAMPLE')+'.removed')}catch(e){}return r||true}
+    case 'removed':setRemoved('SAMPLE','Jane');{const r=showInvitation('SAMPLE',Object.assign(b,{answer:'open'}));try{localStorage.removeItem(tokenKey('SAMPLE')+'.removed')}catch(e){}return r||true}
     case 'gaveup':return showInvitation('SAMPLE',Object.assign(b,{answer:'open'}),'You gave up your seat.');
     case 'cantload':return showCantLoad(()=>{});
     case 'notvalid':return showNotValid({host_name:'Jane'});
