@@ -45,6 +45,8 @@
   button.fill{display:block;width:100%;font:16px "Libre Caslon Text",Georgia,serif;color:var(--paper);background:var(--ink);border:1px solid var(--ink);border-radius:0;padding:13px 12px;cursor:pointer}
   button.fill:disabled{opacity:.35;cursor:default}
   button.outline{display:block;width:100%;font:16px "Libre Caslon Text",Georgia,serif;color:var(--ink);background:transparent;border:1px solid var(--ink);border-radius:0;padding:13px 12px;margin:22px 0 0;cursor:pointer}
+  .cantload{font-size:14px;line-height:1.5;color:var(--gray);margin:22px 0 4px}
+  .retry{font:14px "Libre Caslon Text",Georgia,serif;color:var(--ink);background:none;border:0;padding:4px;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer}
   .fail{font-size:13px;line-height:1.5;color:var(--ink);margin:0 0 10px;text-align:center}
   .below{margin:12px 0 0;text-align:center}
   .quiet{display:inline-block;margin:18px 0 0;font:14px "Libre Caslon Text",Georgia,serif;color:var(--gray);background:none;border:0;padding:4px;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer}
@@ -61,7 +63,7 @@
      The code stays in the fragment, which browsers never send to fidelio.film. The page sends it, and the seat's token,
      only in the body of a request to Fidelio's database (four functions, nothing else). The token is kept in this browser.
      Universal links: /showing is left out of /.well-known/apple-app-site-association, so this page opens even with the app installed.
-     Preview without a code: ?sample=open | full | started | cancelled | removed | notvalid | seated | seatedhidden -->
+     Preview without a code: ?sample=open | full | started | cancelled | removed | gaveup | notvalid | cantload | seated | seatedhidden -->
 <main>
   <img class="wordmark" src="/assets/fidelio-wordmark.svg" alt="Fidelio" width="150" height="36">
   <div id="view" aria-live="polite"><p class="gray">Loading the invitation…</p></div>
@@ -95,12 +97,16 @@ function filmsNode(films,iso,tz){
   if(time)p.appendChild(document.createTextNode((t.length?' \u00b7 ':'')+time));
   return (t.length||time)?p:null;
 }
+function doorsLine(d){
+  const parts=[];if(d.doors_at)parts.push('Doors '+timeLine(d.doors_at,d.time_zone));if(d.ends_at)parts.push('Ends about '+timeLine(d.ends_at,d.time_zone));
+  return parts.length?el('p','doors',parts.join(' \u00b7 ')):null;
+}
 function head(d,opts){
   opts=opts||{};
   add(view,el('p','eyebrow','An invitation to a showing'));
   if(d.starts_at)add(view,el('h1',null,dayLine(d.starts_at,d.time_zone)));
   add(view,filmsNode(d.films,d.starts_at,d.time_zone));
-  if(d.doors_at)add(view,el('p','doors','Doors '+timeLine(d.doors_at,d.time_zone)));
+  add(view,doorsLine(d));
   if(d.society_name)add(view,el('p','gray',d.host_name?('Hosted by '+d.host_name+', for '+d.society_name+'.'):('Hosted for '+d.society_name+'.')));
   if(opts.seatsLeft&&typeof d.guest_seats_left==='number'&&d.guest_seats_left>0)
     add(view,el('p','gray',d.guest_seats_left===1?'1 seat left for guests.':d.guest_seats_left+' seats left for guests.'));
@@ -112,6 +118,8 @@ function tokenKey(code){return 'fidelio.showing.'+code}
 function getToken(code){try{return localStorage.getItem(tokenKey(code))}catch(e){return null}}
 function setToken(code,t){try{localStorage.setItem(tokenKey(code),t)}catch(e){}}
 function dropToken(code){try{localStorage.removeItem(tokenKey(code))}catch(e){}}
+function setRemoved(code){try{localStorage.setItem(tokenKey(code)+'.removed','1')}catch(e){}}
+function isRemoved(code){try{return localStorage.getItem(tokenKey(code)+'.removed')==='1'}catch(e){return false}}
 
 // ---------- the four calls ----------
 function call(name,body){
@@ -126,9 +134,9 @@ function call(name,body){
 function showCantLoad(retry){
   clear();
   add(view,el('p','eyebrow','An invitation to a showing'));
-  add(view,el('p','state','Couldn\u2019t load the invitation.'));
-  add(view,el('p','gray',navigator.onLine===false?'You\u2019re offline.':'Try again.'));
-  const b=el('button','outline','Try again');b.type='button';b.addEventListener('click',retry);add(view,b);
+  add(view,el('p','cantload','Couldn\u2019t load the invitation.'));
+  if(navigator.onLine===false){add(view,el('p','cantload','You\u2019re offline.'));window.addEventListener('online',retry,{once:true});return}
+  const b=el('button','retry','Try again');b.type='button';b.addEventListener('click',retry);add(view,b);
 }
 function showNotValid(d){
   clear();
@@ -138,11 +146,12 @@ function showNotValid(d){
 }
 function cancelledLine(d){
   // A host's own cancel names the host (ruling 59). A takedown, a host who left or was deleted: no name (in pattern, sections 80 and 83).
-  if(d.cancel_reason==='host'&&!d.taken_down&&d.host_name)return d.host_name+' cancelled this showing.';
+  if(d.cancel_reason==='host'&&!d.taken_down)return (d.host_name?d.host_name:'The host')+' cancelled this showing.';
   return 'This showing was cancelled.';
 }
 function showInvitation(code,d,note){
   clear();
+  if(isRemoved(code)&&(d.answer==='open'||d.answer==='full')){head(d);add(view,el('p','state',(d.host_name?d.host_name:'The host')+' took back your seat.'));return}
   if(d.answer==='not valid')return showNotValid(d);
   if(d.answer==='started'){head(d);add(view,el('p','state','This showing has started.'));return}
   if(d.answer==='cancelled'){head(d);add(view,el('p','state',cancelledLine(d)));return}
@@ -165,20 +174,20 @@ function form(code,d){
   add(below,el('p','gray',(d.host_name?d.host_name:'The host')+' and '+d.society_name+' see your first name.'));
   if(d.address_shown===false)add(below,el('p','gray','The address comes from '+(d.host_name?d.host_name:'the host')+'.'));
   add(f,lab,name,boxLab,fail,go);add(view,f,below);
-  const ok=()=>{const n=name.value.trim();go.disabled=!(n.length>=1&&n.length<=30&&box.checked)};
-  name.addEventListener('input',()=>{fail.hidden=true;ok()});box.addEventListener('change',()=>{fail.hidden=true;ok()});
+  const ok=()=>{const n=name.value.trim();go.disabled=!(/\p{L}/u.test(n)&&n.length<=30&&box.checked)};
+  name.addEventListener('input',()=>{const v=name.value.replace(/[\r\n]+/g,' ');if(v!==name.value)name.value=v.slice(0,30);fail.hidden=true;ok()});box.addEventListener('change',()=>{fail.hidden=true;ok()});
   f.addEventListener('submit',ev=>{
     ev.preventDefault();ok();if(go.disabled)return;
     go.disabled=true;name.disabled=true;box.disabled=true;go.textContent='Reserving\u2026';fail.hidden=true;
     const restore=()=>{go.textContent='Reserve a seat';name.disabled=false;box.disabled=false;ok()};
     reserve(code,name.value.trim(),box.checked).then(r=>{
       if(r.answer==='reserved'&&r.token){setToken(code,r.token);return showSeat(code,r.seat||{})}
-      if(r.answer==='bad name'){restore();fail.textContent='Type a first name of up to 30 letters, on one line.';fail.hidden=false;name.focus();return}
-      if(r.answer==='name not allowed'){restore();fail.textContent='That name can\u2019t be used. Change it and try again.';fail.hidden=false;name.focus();return}
+      if(r.answer==='bad name'){restore();fail.textContent=name.value.trim().length>30?'Your first name can be up to 30 characters.':'Add your first name to reserve a seat.';fail.hidden=false;name.focus();return}
+      if(r.answer==='name not allowed'){restore();fail.textContent='This name can\u2019t be used. Change it and try again.';fail.hidden=false;name.focus();return}
       if(r.answer==='adult needed'){restore();fail.textContent='Tick \u201cI\u2019m 18 or older.\u201d to reserve a seat.';fail.hidden=false;return}
       // full, started, cancelled, not valid: the invitation's own states
       return load(code);
-    }).catch(()=>{restore();fail.textContent='Couldn\u2019t reserve a seat. '+(navigator.onLine===false?'You\u2019re offline.':'Try again.');fail.hidden=false});
+    }).catch(()=>{restore();fail.textContent='Couldn\u2019t reserve your seat. '+(navigator.onLine===false?'You\u2019re offline.':'Try again.');fail.hidden=false});
   });
 }
 function showSeat(code,s){
@@ -188,7 +197,7 @@ function showSeat(code,s){
   add(view,el('h1','seat',s.first_name?('You have a seat, '+s.first_name+'.'):'You have a seat.'));
   if(s.starts_at)add(view,el('p','films',dayLine(s.starts_at,s.time_zone)));
   add(view,filmsNode(s.films,s.starts_at,s.time_zone));
-  if(s.doors_at)add(view,el('p','doors','Doors '+timeLine(s.doors_at,s.time_zone)));
+  add(view,doorsLine(s));
   if(s.place)add(view,el('p','place',s.place));
   if(s.address)add(view,el('p','address',s.address));
   if(s.directions)add(view,el('p','directions',s.directions));
@@ -216,11 +225,12 @@ function reserve(code,n,a){return call('reserve_guest_seat',{p_code:code,p_first
 function icsText(s){
   const esc=v=>String(v).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
   const stamp=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-  const start=new Date(s.starts_at);const end=new Date(start.getTime()+3*60*60*1000); // 3 hours (stand-in)
   const titles=(s.films||[]).map(f=>f&&f.title).filter(Boolean);
+  const start=new Date(s.starts_at);
+  const end=s.ends_at?new Date(s.ends_at):new Date(start.getTime()+(titles.length>1?5:3)*60*60*1000); // section 90(10)
   const summary=titles.length?('Showing: '+titles.join(' and ')):'Showing';
   const where=[s.place,s.address].filter(Boolean).join(', ');
-  const desc=[s.society_name?(s.host_name?('Hosted by '+s.host_name+', for '+s.society_name+'.'):('Hosted for '+s.society_name+'.')):'',s.doors_at?('Doors '+timeLine(s.doors_at,s.time_zone)):'',s.address?(s.directions||''):''].filter(Boolean).join('\n');
+  const desc=[s.society_name?(s.host_name?('Hosted by '+s.host_name+', for '+s.society_name+'.'):('Hosted for '+s.society_name+'.')):'',s.doors_at?('Doors '+timeLine(s.doors_at,s.time_zone)):'',s.ends_at?('Ends about '+timeLine(s.ends_at,s.time_zone)):'',s.address?(s.directions||''):''].filter(Boolean).join('\n');
   const uid='showing-'+stamp(start)+'-'+Math.random().toString(36).slice(2)+'@fidelio.film';
   return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Fidelio//Showing//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
     'UID:'+uid,'DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(end),'SUMMARY:'+esc(summary),
@@ -240,8 +250,8 @@ function load(code,note){
     return call('guest_seat',{p_token:t}).then(s=>{
       if(s.answer==='seated')return showSeat(code,s);
       if(s.answer==='cancelled')return showSeat(code,s);
-      dropToken(code); // removed, given up elsewhere, or gone: back to the invitation
-      return load(code,'You no longer have a seat.');
+      dropToken(code);setRemoved(code); // the host took the seat back (or the showing is gone): no form again in this browser
+      return load(code);
     }).catch(()=>showCantLoad(()=>load(code,note)));
   }
   return call('guest_invitation',{p_code:code}).then(d=>showInvitation(code,d,note)).catch(()=>showCantLoad(()=>load(code,note)));
@@ -259,7 +269,9 @@ function sample(kind){
     case 'full':return showInvitation('SAMPLE',Object.assign(b,{answer:'full',guest_seats_left:0}));
     case 'started':return showInvitation('SAMPLE',Object.assign(b,{answer:'started'}));
     case 'cancelled':return showInvitation('SAMPLE',Object.assign(b,{answer:'cancelled',cancel_reason:'host',taken_down:false}));
-    case 'removed':return showInvitation('SAMPLE',Object.assign(b,{answer:'open'}),'You no longer have a seat.');
+    case 'removed':setRemoved('SAMPLE');{const r=showInvitation('SAMPLE',Object.assign(b,{answer:'open'}));try{localStorage.removeItem(tokenKey('SAMPLE')+'.removed')}catch(e){}return r||true}
+    case 'gaveup':return showInvitation('SAMPLE',Object.assign(b,{answer:'open'}),'You gave up your seat.');
+    case 'cantload':return showCantLoad(()=>{});
     case 'notvalid':return showNotValid({host_name:'Jane'});
     case 'seated':return showSeat('SAMPLE',Object.assign(seat,{address_shown:true,address:'1234 Example Street\nLos Angeles, CA 90026',directions:'Street parking on Example Street; ring the side gate.'}));
     case 'seatedhidden':return showSeat('SAMPLE',seat);
