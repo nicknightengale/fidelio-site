@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f5f1e8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<title>Your Digest · Fidelio</title>
+<link rel="icon" href="/assets/fidelio-app-icon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/fonts/fonts.css">
+<link rel="stylesheet" href="/page.css">
+<style>
+.choices{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:10px}
+.choices button{font:inherit;font-size:1.02rem;background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;cursor:pointer}
+.choices button[disabled]{color:var(--muted);cursor:default}
+.hint{color:var(--muted);font-size:.92rem}
+</style>
+</head><body><div class="wrap">
+<header><p class="mark"><a href="/">Fidelio</a></p></header>
+<article>
+  <p class="eyebrow">The Digest</p>
+  <h1 id="msg">One moment…</h1>
+  <p id="hint" class="hint" hidden></p>
+  <p id="note" hidden></p>
+  <ul id="choices" class="choices" hidden></ul>
+  <noscript><p>This page needs JavaScript to change your Digest. You can also turn the Digest off with the unsubscribe option in your email app.</p></noscript>
+</article>
+<footer><a href="/">Waitlist</a><a href="/what-fidelio-is">What Fidelio is</a><a href="/about.html">About</a><a href="/privacy.html">Privacy</a><a href="/terms">Terms</a><a href="/buying-links">Buying links</a><a href="/support.html">Support</a><span style="margin-inline:10px">© 2026 Fidelio Cinema LLC</span></footer>
+</div>
+<script>
+// The Digest link door (Design ruling 22 rule 5; app issue #868).
+// Each Digest link opens /digest?l=<signed token>. This page POSTs the link's own
+// action on load, then offers the other choices. No cookies, no sign-in, no tracking.
+const FUNCTION_URL = ''; // app-digest URL from the Data Steward, set once the function is deployed
+
+const SAY = {daily:"You’ll get the Digest daily.", weekly:"You’ll get the Digest weekly.", off:"You won’t get the Digest."};
+const ASK = {daily:"Send it daily instead", weekly:"Send it weekly instead", off:"Turn the Digest off"};
+const $ = id => document.getElementById(id);
+const token = new URLSearchParams(location.search).get('l');
+
+function show(text, note){ $('msg').textContent = text; if(note){ $('note').textContent = note; $('note').hidden = false; } else { $('note').hidden = true; } }
+function fail(status){
+  $('choices').hidden = true;
+  if(status === 410) show("This link has expired.", "Use the links in your most recent Digest.");
+  else if(status === 400) show("This link doesn’t work.", "Use the links in your most recent Digest.");
+  else { show("That didn’t go through.", "Nothing changed. Try again in a moment."); offer(null, true); }
+}
+function offer(state, retry){
+  const ul = $('choices'); ul.textContent = '';
+  const keys = retry ? [] : ['daily','weekly','off'].filter(k => k !== state);
+  keys.forEach(k => { const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button'; b.textContent = ASK[k]; b.onclick = () => send(k); li.append(b); ul.append(li); });
+  if(retry){ const li = document.createElement('li'), b = document.createElement('button'); b.type = 'button'; b.textContent = 'Try again'; b.onclick = () => send(null); li.append(b); ul.append(li); }
+  ul.hidden = false;
+}
+async function send(set){
+  $('choices').querySelectorAll('button').forEach(b => b.disabled = true);
+  try{
+    const body = set ? {l: token, set} : {l: token};
+    const r = await fetch(FUNCTION_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body), credentials:'omit', referrerPolicy:'no-referrer'});
+    if(!r.ok) return fail(r.status);
+    const j = await r.json();
+    const state = j.state === 'unsubscribe' ? 'off' : j.state;
+    if(!SAY[state]) return fail(0);
+    show(SAY[state]); offer(state, false);
+    hint();
+  }catch(e){ fail(0); }
+}
+async function hint(){
+  if($('hint').textContent) return;
+  try{
+    const r = await fetch(FUNCTION_URL + (FUNCTION_URL.includes('?') ? '&' : '?') + 'l=' + encodeURIComponent(token), {credentials:'omit', referrerPolicy:'no-referrer'});
+    if(!r.ok) return;
+    const j = await r.json();
+    if(j.email_hint){ $('hint').textContent = 'For ' + j.email_hint; $('hint').hidden = false; }
+  }catch(e){}
+}
+if(!FUNCTION_URL) show("The Digest isn’t sending yet.", "This page will work once the first Digest goes out.");
+else if(!token) show("This link is incomplete.", "Use the links in your most recent Digest.");
+else send(null);
+</script>
+</body></html>
