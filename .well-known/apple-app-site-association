@@ -9,7 +9,8 @@
           { "/": "/join", "comment": "Household invitations: fidelio.film/join#<code>" },
           { "/": "/join/", "comment": "The same, with a trailing slash" },
           { "/": "/society", "comment": "Film Society invitations: fidelio.film/society#<code>" },
-          { "/": "/society/", "comment": "The same, with a trailing slash" }
+          { "/": "/society/", "comment": "The same, with a trailing slash" },
+          { "/": "/tiktok/*", "comment": "TikTok Share Kit redirect" }
         ]
       }
     ]
